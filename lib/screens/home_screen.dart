@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:rental_car_flutter/widgets/bottom_nav_bar.dart';
 import 'package:rental_car_flutter/widgets/home_drawer.dart';
+import 'package:rental_car_flutter/widgets/my_view_list.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key}); // Usar el super parámetro directamente
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -14,37 +15,6 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isSearching = false;
   static const List<String> _pageTitles = <String>['', 'Página 2', 'Página 3'];
 
-  static final List<Widget> _widgetOptions = <Widget>[
-    ListView(
-      children: [
-        ListTile(
-          leading: Image.network(
-            'https://thumbs.dreamstime.com/z/red-retro-car-truck-carries-snowman-decorated-christmas-tree-home-back-beautiful-winter-new-year-s-countryside-landscape-341381538.jpg?ct=jpeg',
-          ),
-          title: Text('Texto asociado a la imagen 1'),
-        ),
-        // ListTile(
-        //   leading: Image.network(
-        //     'https://via.placeholder.com/50',
-        //   ), // Imagen ejemplo
-        //   title: Text('Texto asociado a la imagen 2'),
-        // ),
-        // ListTile(
-        //   leading: Image.network(
-        //     'https://via.placeholder.com/50',
-        //   ), // Imagen ejemplo
-        //   title: Text('Texto asociado a la imagen 3'),
-        // ),
-      ],
-    ),
-    Center(
-      child: Text('Contenido de la Página 2', style: TextStyle(fontSize: 18)),
-    ),
-    Center(
-      child: Text('Contenido de la Página 3', style: TextStyle(fontSize: 18)),
-    ),
-  ];
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -53,41 +23,45 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> widgetOptions = <Widget>[
+      MyListView(),
+      Center(
+        child: Text('Contenido de la Página 2', style: TextStyle(fontSize: 18)),
+      ),
+      Center(
+        child: Text('Contenido de la Página 3', style: TextStyle(fontSize: 18)),
+      ),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title:
             _isSearching
                 ? TextField(
-                  autofocus: true, // Abre el teclado automáticamente
+                  autofocus: true,
                   decoration: InputDecoration(
                     hintText: 'Buscar...',
                     border: InputBorder.none,
                   ),
                   onChanged: (String value) {
-                    // Actualiza los resultados de la búsqueda mientras el usuario escribe
                     print('Buscando: $value');
                   },
                 )
                 : Text(_pageTitles[_selectedIndex]),
         actions: [
-          if (_selectedIndex == 0) // Iconos solo en Página 1
+          if (_selectedIndex == 0)
             IconButton(
-              icon: Icon(
-                _isSearching ? Icons.close : Icons.search,
-              ), // Alterna lupa y cerrar
+              icon: Icon(_isSearching ? Icons.close : Icons.search),
               onPressed: () {
                 setState(() {
-                  _isSearching =
-                      !_isSearching; // Alternar entre buscar y mostrar el título
+                  _isSearching = !_isSearching;
                 });
               },
             ),
-          if (_selectedIndex == 0 &&
-              !_isSearching) // Ícono del calendario solo si no estás buscando
+          if (_selectedIndex == 0 && !_isSearching)
             IconButton(
               icon: Icon(Icons.calendar_today),
               onPressed: () {
-                // Acción del calendario
                 print('Calendario abierto');
               },
             ),
@@ -97,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
         pageTitles: _pageTitles,
         selectedIndex: _selectedIndex,
       ),
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
