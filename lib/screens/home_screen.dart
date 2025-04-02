@@ -14,9 +14,28 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isSearching = false;
   static const List<String> _pageTitles = <String>['', 'Página 2', 'Página 3'];
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    Center(
-      child: Text('Contenido de la Página 1', style: TextStyle(fontSize: 18)),
+  static final List<Widget> _widgetOptions = <Widget>[
+    ListView(
+      children: [
+        ListTile(
+          leading: Image.network(
+            'https://thumbs.dreamstime.com/z/red-retro-car-truck-carries-snowman-decorated-christmas-tree-home-back-beautiful-winter-new-year-s-countryside-landscape-341381538.jpg?ct=jpeg',
+          ),
+          title: Text('Texto asociado a la imagen 1'),
+        ),
+        // ListTile(
+        //   leading: Image.network(
+        //     'https://via.placeholder.com/50',
+        //   ), // Imagen ejemplo
+        //   title: Text('Texto asociado a la imagen 2'),
+        // ),
+        // ListTile(
+        //   leading: Image.network(
+        //     'https://via.placeholder.com/50',
+        //   ), // Imagen ejemplo
+        //   title: Text('Texto asociado a la imagen 3'),
+        // ),
+      ],
     ),
     Center(
       child: Text('Contenido de la Página 2', style: TextStyle(fontSize: 18)),
