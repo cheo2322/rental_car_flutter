@@ -79,69 +79,60 @@ class _CarRegisterState extends State<CarRegister> {
           children: [
             _loadingBrands
                 ? CircularProgressIndicator()
-                : DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    labelText: 'Marca *',
-                    border: OutlineInputBorder(),
-                    errorText: _brandError ? 'Este campo es obligatorio' : null,
-                  ),
-                  value: _selectedBrand,
-                  items:
-                      _brands.map((IdAndNameDto item) {
-                        return DropdownMenuItem<String>(
-                          value: item.id,
-                          child: Text(item.name),
-                        );
-                      }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedBrand = newValue;
-                    });
-                  },
+                : Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Marca *',
+                          border: OutlineInputBorder(),
+                          errorText:
+                              _brandError ? 'Este campo es obligatorio' : null,
+                        ),
+                        value: _selectedBrand,
+                        items:
+                            _brands.map((IdAndNameDto item) {
+                              return DropdownMenuItem<String>(
+                                value: item.id,
+                                child: Text(item.name),
+                              );
+                            }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedBrand = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        print('Botón de agregar presionado');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: EdgeInsets.all(12),
+                      ),
+                      child: Icon(Icons.add),
+                    ),
+                  ],
                 ),
             SizedBox(height: 16),
-
-            // DropdownButtonFormField<String>(
-            //   decoration: InputDecoration(
-            //     labelText: 'Transmisión *',
-            //     border: OutlineInputBorder(),
-            //     errorText:
-            //         _transmissionError ? 'Este campo es obligatorio' : null,
-            //   ),
-            //   value: _selectedTransmission,
-            //   items:
-            //       ['Manual', 'Automático'].map((String transmission) {
-            //         return DropdownMenuItem<String>(
-            //           value: transmission,
-            //           child: Text(transmission),
-            //         );
-            //       }).toList(),
-            //   onChanged: (String? newValue) {
-            //     setState(() {
-            //       _selectedTransmission = newValue;
-            //     });
-            //   },
-            // ),
-            // SizedBox(height: 16),
             ElevatedButton(
               onPressed:
                   _isFormComplete()
                       ? () {
                         setState(() {
-                          // Validación de los campos
-                          // _nameError = _carNameController.text.isEmpty;
-                          // _modelError = _carModelController.text.isEmpty;
-                          // _typeError = _selectedType == null;
-                          // _transmissionError = _selectedTransmission == null;
                           _brandError = _selectedBrand == null;
                         });
 
                         if (_isFormComplete()) {
-                          // Acción al guardar el formulario
                           print('Brand: $_selectedBrand');
                         }
                       }
-                      : null, // Deshabilitar si no está completo
+                      : null, // Deshabilitar si el formulario no está completo.
               child: Text('Registrar'),
             ),
           ],
