@@ -15,6 +15,7 @@ class _CarRegisterState extends State<CarRegister> {
   // final TextEditingController _carModelController = TextEditingController();
 
   String? _selectedBrand;
+  String? _selectedModel;
 
   final ApiService _apiService = ApiService(); // Instancia del servicio
 
@@ -28,19 +29,23 @@ class _CarRegisterState extends State<CarRegister> {
   // bool _typeError = false;
   // bool _transmissionError = false;
   bool _brandError = false;
+  bool _modelError = false;
 
   bool _isFormComplete() {
     // return _carNameController.text.isNotEmpty &&
     //     _carModelController.text.isNotEmpty &&
     //     _selectedType != null &&
     //     _selectedTransmission != null;
-    return _selectedBrand != null;
+    return _selectedBrand != null && _selectedModel != null;
   }
 
   List<IdAndNameDto> _brands = [];
-  bool _loadingBrands = true;
+  List<IdAndNameDto> _models = [];
 
-  Future<void> _fetchTypes() async {
+  bool _loadingBrands = true;
+  bool _loadingModels = true;
+
+  Future<void> _fetchBrands() async {
     try {
       final data = await _apiService.getBrands();
       setState(() {
@@ -55,10 +60,25 @@ class _CarRegisterState extends State<CarRegister> {
     }
   }
 
+  Future<void> _fetchModels(String brandId) async {
+    try {
+      final data = await _apiService.getModels(brandId);
+      setState(() {
+        _models = data;
+        _loadingModels = false;
+      });
+    } catch (e) {
+      print("Error al cargar modelos: $e");
+      setState(() {
+        _loadingModels = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    _fetchTypes();
+    _fetchBrands();
   }
 
   @override
@@ -100,6 +120,7 @@ class _CarRegisterState extends State<CarRegister> {
                             onChanged: (String? newValue) {
                               setState(() {
                                 _selectedBrand = newValue;
+                                _fetchModels(_selectedBrand!);
                               });
                             },
                           ),
@@ -119,6 +140,56 @@ class _CarRegisterState extends State<CarRegister> {
                 ),
               ],
             ),
+
+            _selectedBrand != null ? SizedBox(height: 16) : Container(),
+
+            _selectedBrand != null
+                ? Row(
+                  children: [
+                    Expanded(
+                      child:
+                          _loadingModels
+                              ? Center(child: CircularProgressIndicator())
+                              : DropdownButtonFormField<String>(
+                                decoration: InputDecoration(
+                                  labelText:
+                                      'Model* (press the + button to add)',
+                                  border: OutlineInputBorder(),
+                                  errorText:
+                                      _modelError ? 'Mandatory field' : null,
+                                ),
+                                value: _selectedModel,
+                                items:
+                                    _models.map((IdAndNameDto item) {
+                                      return DropdownMenuItem<String>(
+                                        value: item.id,
+                                        child: Text(item.name),
+                                      );
+                                    }).toList(),
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    _selectedModel = newValue;
+                                  });
+                                },
+                              ),
+                    ),
+                    SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        print('Botón de agregar presionado');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: EdgeInsets.all(12),
+                      ),
+                      child: Icon(Icons.add),
+                    ),
+                  ],
+                )
+                : Container(),
+
             SizedBox(height: 16),
             ElevatedButton(
               onPressed:
@@ -126,14 +197,17 @@ class _CarRegisterState extends State<CarRegister> {
                       ? () {
                         setState(() {
                           _brandError = _selectedBrand == null;
+                          _modelError = _selectedModel == null;
                         });
 
                         if (_isFormComplete()) {
-                          print('Brand: $_selectedBrand');
+                          print(
+                            'Brand: $_selectedBrand, Model: $_selectedModel',
+                          );
                         }
                       }
-                      : null, // Deshabilitar si el formulario no está completo.
-              child: Text('Registrar'),
+                      : null,
+              child: Text('Register'),
             ),
           ],
         ),

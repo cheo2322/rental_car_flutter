@@ -22,6 +22,20 @@ class ApiService {
     }
   }
 
+  Future<List<IdAndNameDto>> getModels(String brandId) async {
+    try {
+      final response = await _dio.get("/brands/$brandId/models");
+      final data = response.data;
+      if (data != null) {
+        return IdAndNameDto.fromJsonList(data);
+      }
+      return [];
+    } catch (e) {
+      print("Error en getModels: $e");
+      return [];
+    }
+  }
+
   //   // Llamada API 1: Obtener datos con filtro
   //   Future<List<IdAndNameDto>> getData(String filter) async {
   //     try {
