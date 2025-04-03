@@ -75,6 +75,16 @@ class _CarRegisterState extends State<CarRegister> {
     }
   }
 
+  Future<IdAndNameDto> _createBrand(String name) async {
+    try {
+      final data = await _apiService.postBrand(name);
+      return data!;
+    } catch (e) {
+      print("Error al crear marca: $e");
+      throw e;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -91,7 +101,7 @@ class _CarRegisterState extends State<CarRegister> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Registrar Auto')),
+      appBar: AppBar(title: Text('Register my car')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -127,9 +137,83 @@ class _CarRegisterState extends State<CarRegister> {
                 ),
                 SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: () {
-                    print('Botón de agregar presionado');
-                  },
+                  onPressed:
+                      _loadingBrands
+                          ? null
+                          : () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                TextEditingController textController =
+                                    TextEditingController();
+                                bool isAddEnabled = false;
+
+                                return StatefulBuilder(
+                                  builder: (context, setStateDialog) {
+                                    return AlertDialog(
+                                      title: Text("Add a new brand"),
+                                      content: TextField(
+                                        controller: textController,
+                                        onChanged: (value) {
+                                          setStateDialog(() {
+                                            isAddEnabled = value.length >= 2;
+                                          });
+                                        },
+                                        decoration: InputDecoration(
+                                          hintText: "Brand name",
+                                        ),
+                                      ),
+                                      actions: <Widget>[
+                                        ElevatedButton(
+                                          onPressed:
+                                              isAddEnabled
+                                                  ? () {
+                                                    final newBrandName =
+                                                        textController.text;
+
+                                                    Navigator.of(context).pop();
+                                                    _createBrand(newBrandName)
+                                                        .then((value) {
+                                                          setState(() {
+                                                            if (!_brands.any(
+                                                              (brand) =>
+                                                                  brand.id ==
+                                                                  value.id,
+                                                            )) {
+                                                              _brands.add(
+                                                                value,
+                                                              );
+                                                            }
+
+                                                            _selectedBrand =
+                                                                value.id;
+                                                            _fetchModels(
+                                                              value.id!,
+                                                            );
+                                                          });
+                                                        })
+                                                        .catchError((error) {
+                                                          print(
+                                                            "Error: $error",
+                                                          );
+                                                        });
+                                                  }
+                                                  : null,
+                                          child: Text("Add"),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text("Close"),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),

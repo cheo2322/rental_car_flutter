@@ -18,7 +18,7 @@ class HomeDrawer extends StatelessWidget {
             ),
           ),
           ListTile(
-            title: Text('Rentar mi auto'),
+            title: Text('Register my car'),
             onTap: () {
               Navigator.push(
                 context,
