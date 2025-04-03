@@ -77,48 +77,48 @@ class _CarRegisterState extends State<CarRegister> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _loadingBrands
-                ? CircularProgressIndicator()
-                : Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          labelText: 'Marca *',
-                          border: OutlineInputBorder(),
-                          errorText:
-                              _brandError ? 'Este campo es obligatorio' : null,
-                        ),
-                        value: _selectedBrand,
-                        items:
-                            _brands.map((IdAndNameDto item) {
-                              return DropdownMenuItem<String>(
-                                value: item.id,
-                                child: Text(item.name),
-                              );
-                            }).toList(),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _selectedBrand = newValue;
-                          });
-                        },
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        print('Botón de agregar presionado');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: EdgeInsets.all(12),
-                      ),
-                      child: Icon(Icons.add),
-                    ),
-                  ],
+            Row(
+              children: [
+                Expanded(
+                  child:
+                      _loadingBrands
+                          ? Center(child: CircularProgressIndicator())
+                          : DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              labelText: 'Brand* (press the + button to add)',
+                              border: OutlineInputBorder(),
+                              errorText: _brandError ? 'Mandatory field' : null,
+                            ),
+                            value: _selectedBrand,
+                            items:
+                                _brands.map((IdAndNameDto item) {
+                                  return DropdownMenuItem<String>(
+                                    value: item.id,
+                                    child: Text(item.name),
+                                  );
+                                }).toList(),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                _selectedBrand = newValue;
+                              });
+                            },
+                          ),
                 ),
+                SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    print('Botón de agregar presionado');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: EdgeInsets.all(12),
+                  ),
+                  child: Icon(Icons.add),
+                ),
+              ],
+            ),
             SizedBox(height: 16),
             ElevatedButton(
               onPressed:
