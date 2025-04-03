@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:rental_car_flutter/screens/car_register.dart';
 
 class HomeDrawer extends StatelessWidget {
-  const HomeDrawer({
-    super.key,
-    required List<String> pageTitles,
-    required int selectedIndex,
-  }) : _pageTitles = pageTitles,
-       _selectedIndex = selectedIndex;
-
-  final List<String> _pageTitles;
-  final int _selectedIndex;
+  const HomeDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,14 +13,17 @@ class HomeDrawer extends StatelessWidget {
           DrawerHeader(
             decoration: BoxDecoration(color: Colors.blue),
             child: Text(
-              _pageTitles[_selectedIndex], // Cambia dinámicamente el header del Drawer
+              'Cabecera por defecto',
               style: TextStyle(color: Colors.white, fontSize: 24),
             ),
           ),
           ListTile(
-            title: Text('Item 1'),
+            title: Text('Rentar mi auto'),
             onTap: () {
-              // Acción al seleccionar Item 1
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CarRegister()),
+              );
             },
           ),
           ListTile(

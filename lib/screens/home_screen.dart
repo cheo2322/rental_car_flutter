@@ -67,10 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
         ],
       ),
-      drawer: HomeDrawer(
-        pageTitles: _pageTitles,
-        selectedIndex: _selectedIndex,
-      ),
+      drawer: HomeDrawer(),
       body: widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _selectedIndex,
