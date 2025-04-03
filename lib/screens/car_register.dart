@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:rental_car_flutter/model/id_and_name_dto.dart';
+import 'package:rental_car_flutter/web/api_service.dart';
 
 class CarRegister extends StatefulWidget {
   const CarRegister({super.key});
@@ -9,32 +11,61 @@ class CarRegister extends StatefulWidget {
 
 class _CarRegisterState extends State<CarRegister> {
   // Controladores de texto
-  final TextEditingController _carNameController = TextEditingController();
-  final TextEditingController _carModelController = TextEditingController();
+  // final TextEditingController _carNameController = TextEditingController();
+  // final TextEditingController _carModelController = TextEditingController();
 
-  // Variables para controlar los dropdowns
-  String? _selectedType; // Tipo de auto
-  String? _selectedTransmission; // Transmisión
+  String? _selectedBrand;
+
+  final ApiService _apiService = ApiService(); // Instancia del servicio
+
+  // // Variables para controlar los dropdowns
+  // String? _selectedType; // Tipo de auto
+  // String? _selectedTransmission; // Transmisión
 
   // Variables para la validación
-  bool _nameError = false;
-  bool _modelError = false;
-  bool _typeError = false;
-  bool _transmissionError = false;
+  // bool _nameError = false;
+  // bool _modelError = false;
+  // bool _typeError = false;
+  // bool _transmissionError = false;
+  bool _brandError = false;
+
+  bool _isFormComplete() {
+    // return _carNameController.text.isNotEmpty &&
+    //     _carModelController.text.isNotEmpty &&
+    //     _selectedType != null &&
+    //     _selectedTransmission != null;
+    return _selectedBrand != null;
+  }
+
+  List<IdAndNameDto> _brands = [];
+  bool _loadingBrands = true;
+
+  Future<void> _fetchTypes() async {
+    try {
+      final data = await _apiService.getBrands();
+      setState(() {
+        _brands = data;
+        _loadingBrands = false;
+      });
+    } catch (e) {
+      print("Error al cargar tipos: $e");
+      setState(() {
+        _loadingBrands = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTypes();
+  }
 
   @override
   void dispose() {
-    // Liberar recursos de los controladores al cerrar la página
-    _carNameController.dispose();
-    _carModelController.dispose();
+    // _carNameController.dispose();
+    // _carModelController.dispose();
     super.dispose();
-  }
-
-  bool _isFormComplete() {
-    return _carNameController.text.isNotEmpty &&
-        _carModelController.text.isNotEmpty &&
-        _selectedType != null &&
-        _selectedTransmission != null;
   }
 
   @override
@@ -46,45 +77,28 @@ class _CarRegisterState extends State<CarRegister> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // TextField(
-            //   controller: _carNameController,
-            //   decoration: InputDecoration(
-            //     labelText: 'Nombre del Auto *',
-            //     border: OutlineInputBorder(),
-            //     errorText: _nameError ? 'Este campo es obligatorio' : null,
-            //   ),
-            // ),
-            // SizedBox(height: 16),
-
-            // TextField(
-            //   controller: _carModelController,
-            //   decoration: InputDecoration(
-            //     labelText: 'Modelo del Auto *',
-            //     border: OutlineInputBorder(),
-            //     errorText: _modelError ? 'Este campo es obligatorio' : null,
-            //   ),
-            // ),
-            // SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: 'Marca *',
-                border: OutlineInputBorder(),
-                errorText: _typeError ? 'Este campo es obligatorio' : null,
-              ),
-              value: _selectedType,
-              items:
-                  ['Eléctrico', 'Combustión'].map((String type) {
-                    return DropdownMenuItem<String>(
-                      value: type,
-                      child: Text(type),
-                    );
-                  }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedType = newValue;
-                });
-              },
-            ),
+            _loadingBrands
+                ? CircularProgressIndicator()
+                : DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    labelText: 'Marca *',
+                    border: OutlineInputBorder(),
+                    errorText: _brandError ? 'Este campo es obligatorio' : null,
+                  ),
+                  value: _selectedBrand,
+                  items:
+                      _brands.map((IdAndNameDto item) {
+                        return DropdownMenuItem<String>(
+                          value: item.id,
+                          child: Text(item.name),
+                        );
+                      }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedBrand = newValue;
+                    });
+                  },
+                ),
             SizedBox(height: 16),
 
             // DropdownButtonFormField<String>(
@@ -109,25 +123,22 @@ class _CarRegisterState extends State<CarRegister> {
             //   },
             // ),
             // SizedBox(height: 16),
-
-            // Botón Registrar
             ElevatedButton(
               onPressed:
                   _isFormComplete()
                       ? () {
                         setState(() {
                           // Validación de los campos
-                          _nameError = _carNameController.text.isEmpty;
-                          _modelError = _carModelController.text.isEmpty;
-                          _typeError = _selectedType == null;
-                          _transmissionError = _selectedTransmission == null;
+                          // _nameError = _carNameController.text.isEmpty;
+                          // _modelError = _carModelController.text.isEmpty;
+                          // _typeError = _selectedType == null;
+                          // _transmissionError = _selectedTransmission == null;
+                          _brandError = _selectedBrand == null;
                         });
 
                         if (_isFormComplete()) {
                           // Acción al guardar el formulario
-                          print(
-                            'Nombre: ${_carNameController.text}, Modelo: ${_carModelController.text}, Tipo: $_selectedType, Transmisión: $_selectedTransmission',
-                          );
+                          print('Brand: $_selectedBrand');
                         }
                       }
                       : null, // Deshabilitar si no está completo
