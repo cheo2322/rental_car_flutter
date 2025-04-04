@@ -141,78 +141,7 @@ class _CarRegisterState extends State<CarRegister> {
                       _loadingBrands
                           ? null
                           : () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                TextEditingController textController =
-                                    TextEditingController();
-                                bool isAddEnabled = false;
-
-                                return StatefulBuilder(
-                                  builder: (context, setStateDialog) {
-                                    return AlertDialog(
-                                      title: Text("Add a new brand"),
-                                      content: TextField(
-                                        controller: textController,
-                                        onChanged: (value) {
-                                          setStateDialog(() {
-                                            isAddEnabled = value.length >= 2;
-                                          });
-                                        },
-                                        decoration: InputDecoration(
-                                          hintText: "Brand name",
-                                        ),
-                                      ),
-                                      actions: <Widget>[
-                                        ElevatedButton(
-                                          onPressed:
-                                              isAddEnabled
-                                                  ? () {
-                                                    final newBrandName =
-                                                        textController.text;
-
-                                                    Navigator.of(context).pop();
-                                                    _createBrand(newBrandName)
-                                                        .then((value) {
-                                                          setState(() {
-                                                            if (!_brands.any(
-                                                              (brand) =>
-                                                                  brand.id ==
-                                                                  value.id,
-                                                            )) {
-                                                              _brands.add(
-                                                                value,
-                                                              );
-                                                            }
-
-                                                            _selectedBrand =
-                                                                value.id;
-                                                            _fetchModels(
-                                                              value.id!,
-                                                            );
-                                                          });
-                                                        })
-                                                        .catchError((error) {
-                                                          print(
-                                                            "Error: $error",
-                                                          );
-                                                        });
-                                                  }
-                                                  : null,
-                                          child: Text("Add"),
-                                        ),
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: Text("Close"),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                            );
+                            _showAddDialog(context);
                           },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
@@ -296,6 +225,88 @@ class _CarRegisterState extends State<CarRegister> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showAddDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        TextEditingController brandController = TextEditingController();
+        TextEditingController modelController = TextEditingController();
+        bool isAddEnabled = false;
+
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: brandController,
+                    onChanged: (value) {
+                      setStateDialog(() {
+                        isAddEnabled =
+                            value.length >= 2 &&
+                            modelController.text.length >= 2;
+                      });
+                    },
+                    decoration: InputDecoration(hintText: "Brand"),
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: modelController,
+                    onChanged: (value) {
+                      setStateDialog(() {
+                        isAddEnabled =
+                            value.length >= 2 &&
+                            brandController.text.length >= 2;
+                      });
+                    },
+                    decoration: InputDecoration(hintText: "Model"),
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                ElevatedButton(
+                  onPressed:
+                      isAddEnabled
+                          ? () {
+                            final newBrandName = brandController.text;
+                            final newModelname = modelController.text;
+
+                            Navigator.of(context).pop();
+
+                            _createBrand(newBrandName)
+                                .then((value) {
+                                  setState(() {
+                                    if (!_brands.any(
+                                      (brand) => brand.id == value.id,
+                                    )) {
+                                      _brands.add(value);
+                                    }
+                                    _selectedBrand = value.id;
+                                    _fetchModels(value.id!);
+                                  });
+                                })
+                                .catchError((error) {
+                                  print("Error: $error");
+                                });
+                          }
+                          : null,
+                  child: Text("Add"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("Close"),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
