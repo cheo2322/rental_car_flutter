@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rental_car_flutter/model/brand_name_dto.dart';
 import 'package:rental_car_flutter/model/id_and_name_dto.dart';
 import 'package:rental_car_flutter/web/api_service.dart';
 
@@ -68,20 +69,23 @@ class _CarRegisterState extends State<CarRegister> {
         _loadingModels = false;
       });
     } catch (e) {
-      print("Error al cargar modelos: $e");
+      print("Error loading models: $e");
       setState(() {
         _loadingModels = false;
       });
     }
   }
 
-  Future<IdAndNameDto> _createBrand(String name) async {
+  Future<BrandNameDto> _createBrandAndModel(
+    String brandName,
+    String modelName,
+  ) async {
     try {
-      final data = await _apiService.postBrand(name);
+      final data = await _apiService.postBrandAndModel(brandName, modelName);
       return data!;
     } catch (e) {
-      print("Error al crear marca: $e");
-      throw e;
+      print("Error when creating brand and model: $e");
+      rethrow;
     }
   }
 
@@ -273,20 +277,39 @@ class _CarRegisterState extends State<CarRegister> {
                       isAddEnabled
                           ? () {
                             final newBrandName = brandController.text;
-                            final newModelname = modelController.text;
+                            final newModelName = modelController.text;
 
                             Navigator.of(context).pop();
 
-                            _createBrand(newBrandName)
-                                .then((value) {
+                            _createBrandAndModel(newBrandName, newModelName)
+                                .then((response) {
                                   setState(() {
                                     if (!_brands.any(
-                                      (brand) => brand.id == value.id,
+                                      (brand) => brand.id == response.brandId,
                                     )) {
-                                      _brands.add(value);
+                                      _brands.add(
+                                        IdAndNameDto(
+                                          id: response.brandId,
+                                          name: response.brandName,
+                                        ),
+                                      );
                                     }
-                                    _selectedBrand = value.id;
-                                    _fetchModels(value.id!);
+
+                                    if (!_models.any(
+                                      (model) => model.id == response.modelId,
+                                    )) {
+                                      _models.add(
+                                        IdAndNameDto(
+                                          id: response.modelId,
+                                          name: response.modelName,
+                                        ),
+                                      );
+                                    }
+                                    _selectedBrand = response.brandId;
+                                    _selectedModel = response.modelId;
+
+                                    _loadingBrands = false;
+                                    _loadingModels = false;
                                   });
                                 })
                                 .catchError((error) {

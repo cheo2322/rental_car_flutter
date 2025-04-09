@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:rental_car_flutter/model/brand_name_dto.dart';
 import 'package:rental_car_flutter/model/id_and_name_dto.dart';
 
 class ApiService {
@@ -36,17 +37,25 @@ class ApiService {
     }
   }
 
-  Future<IdAndNameDto?> postBrand(String name) async {
+  Future<BrandNameDto?> postBrandAndModel(
+    String brandName,
+    String modelName,
+  ) async {
     try {
       final response = await _dio.post(
-        "/brands",
-        data: IdAndNameDto(name: name, id: null).toJson(),
+        "/brands/models",
+        data:
+            BrandNameDto(
+              brandId: null,
+              modelId: null,
+              brandName: brandName,
+              modelName: modelName,
+            ).toJson(),
       );
-      print("Respuesta POST: ${response.data}");
-      return IdAndNameDto.fromJson(response.data);
+      print("POST response: ${response.data}");
+      return BrandNameDto.fromJson(response.data);
     } catch (e) {
-      print("Error en postData: $e");
-
+      print("PostData error: $e");
       return null;
     }
   }
