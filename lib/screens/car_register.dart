@@ -89,6 +89,22 @@ class _CarRegisterState extends State<CarRegister> {
     }
   }
 
+  Future<IdAndNameDto> _createModelByNameAndBrandId(
+    String brandId,
+    String modelName,
+  ) async {
+    try {
+      final data = await _apiService.postModelByNameAndBrandId(
+        brandId,
+        modelName,
+      );
+      return data!;
+    } catch (e) {
+      print("Error when creating model by name and brand ID: $e");
+      rethrow;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -133,6 +149,9 @@ class _CarRegisterState extends State<CarRegister> {
                                 }).toList(),
                             onChanged: (String? newValue) {
                               setState(() {
+                                _selectedModel = null;
+                                _loadingModels = true;
+                                _models.clear();
                                 _selectedBrand = newValue;
                                 _fetchModels(_selectedBrand!);
                               });
@@ -142,10 +161,10 @@ class _CarRegisterState extends State<CarRegister> {
                 SizedBox(width: 8),
                 ElevatedButton(
                   onPressed:
-                      _loadingBrands
+                      _loadingBrands || _selectedModel != null
                           ? null
                           : () {
-                            _showAddDialog(context);
+                            _showAddBrandModelDialog(context);
                           },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
@@ -192,9 +211,12 @@ class _CarRegisterState extends State<CarRegister> {
                     ),
                     SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: () {
-                        print('Botón de agregar presionado');
-                      },
+                      onPressed:
+                          _loadingBrands || _selectedModel != null
+                              ? null
+                              : () {
+                                _showAddModelDialog(context);
+                              },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -232,7 +254,7 @@ class _CarRegisterState extends State<CarRegister> {
     );
   }
 
-  void _showAddDialog(BuildContext context) {
+  void _showAddBrandModelDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -309,6 +331,76 @@ class _CarRegisterState extends State<CarRegister> {
                                     _selectedModel = response.modelId;
 
                                     _loadingBrands = false;
+                                    _loadingModels = false;
+                                  });
+                                })
+                                .catchError((error) {
+                                  print("Error: $error");
+                                });
+                          }
+                          : null,
+                  child: Text("Add"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("Close"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showAddModelDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        TextEditingController modelController = TextEditingController();
+        bool isAddEnabled = false;
+
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              content: TextField(
+                controller: modelController,
+                onChanged: (value) {
+                  setStateDialog(() {
+                    isAddEnabled = value.length >= 2;
+                  });
+                },
+                decoration: InputDecoration(hintText: "Model"),
+              ),
+              actions: <Widget>[
+                ElevatedButton(
+                  onPressed:
+                      isAddEnabled
+                          ? () {
+                            final newModelName = modelController.text;
+
+                            Navigator.of(context).pop();
+
+                            _createModelByNameAndBrandId(
+                                  _selectedBrand!,
+                                  newModelName,
+                                )
+                                .then((response) {
+                                  setState(() {
+                                    if (!_models.any(
+                                      (model) => model.id == response.id,
+                                    )) {
+                                      _models.add(
+                                        IdAndNameDto(
+                                          id: response.id,
+                                          name: response.name,
+                                        ),
+                                      );
+                                    }
+
+                                    _selectedModel = response.id;
                                     _loadingModels = false;
                                   });
                                 })

@@ -59,4 +59,20 @@ class ApiService {
       return null;
     }
   }
+
+  Future<IdAndNameDto?> postModelByNameAndBrandId(
+    String brandId,
+    String modelName,
+  ) async {
+    try {
+      final response = await _dio.post(
+        "/brands/$brandId/models",
+        data: IdAndNameDto(id: null, name: modelName).toJson(),
+      );
+      return IdAndNameDto.fromJson(response.data);
+    } catch (e) {
+      print("PostModel error: $e");
+      return null;
+    }
+  }
 }
